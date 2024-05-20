@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Новый пароль</title>
+{% endblock %}
+
+
+{% block body %}
+<div class="container">
+    <h1>Добавить пароль </h1>
+    <div class="container">
+        <form   method="post" enctype="multipart/form-data">
+            <input type="text" class="form-control" name="login" id="login" placeholder="Login"><br>
+            <input type="text" class="form-control" name="url" id="url" placeholder="Адрес"><br>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Имя системы"><br>
+            <input type="text" class="form-control" name="password" id="password" placeholder="Пароль"><br>
+            <input type="text" class="form-control" name="definition" id="definition" placeholder="Описание"><br>
+            <input type="text" class="form-control" name="tags" id="tags" placeholder="Тэги"><br><button class="btn btn-success" type="submit">Добавить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

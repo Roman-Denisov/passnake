@@ -1,0 +1,245 @@
+{% if current_user.is_authenticated %}
+
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>PyKeeper</title>
+{% endblock %}
+
+{% block body %}
+
+<link rel="stylesheet" href="/static/css/good_modal.css">
+<link rel="stylesheet" href="/static/css/live_search.css">
+<script src="/static/js/modal_for_share.js"></script>
+<script src="/static/js/modal_for_details.js"></script>
+<script src="/static/js/encode_decode.js"></script>
+
+
+<div class="container-fluid" style="height: 55px;overflow-y: scroll;">
+  <table class="table table-bordered m-0">
+    <thead class="container">
+      <tr>
+        <th scope="col" style="width:3%; padding-left:15px;">#</th>
+        <th scope="col" style="width:10%">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Логин" class="form-control" name="q_login"  value="{{ request.args.get('q_login', '') }}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:15%">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Адрес" class="form-control" name="q_url"  value="{{request.args.get('q_url', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:38%">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Описание" class="form-control" name="q_definition"  value="{{request.args.get('q_definition', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:10%; text-align:center;">Пароль</th>
+        <th scope="col" style="width:7%">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Тэг" class="form-control" name="q_tag"  value="{{request.args.get('q_tag', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:5.4%; text-align:center;">Поделиться</th>
+        <th scope="col" style="width:5.7%; text-align:center;">Удалить</th>
+      </tr>
+    </thead>
+  </table>
+</div>
+
+<div class="container-fluid" style="height: 81vh; overflow-y: scroll;">
+    <table class="table table-bordered">
+      <tbody>
+        {% for system in systems.items %}
+        <tr>
+          <td style="width:3%">{{ system.id }}</td>
+
+          <td style="width:10%; cursor:pointer"  class="btn-table openmodel" data-params='{
+              "title": "{{system.name}}",
+              "inputShareIdValue": "{{system.id}}",
+              "inputIdValue": "{{system.id}}",
+              "inputLoginValue": "{{system.login}}",
+              "inputUrlValue": "{{system.url}}",
+              "inputNameValue": "{{system.name}}",
+              "inputPasswordValue": "{{system.password}}",
+              "inputDefinitionValue": "{{system.definition}}",
+              "inputTagsValue": "{{system.tags}}",
+              "inputShareIDValue": "{{system.id}}"
+              }'>
+            <p style="text-align:center;"> {{ system.login }} </p>
+          </td>
+
+          <td style="width:15%;">
+              <input type="text" style="text-align:center; display: flow-root;" class="passtextcopy form-control"  value="{{ system.url }}">
+          </td>
+
+          <td style="width:38%; cursor:pointer" class="btn-table openmodel" data-params='{
+              "title": "{{system.name}}",
+              "inputIdValue": "{{system.id}}",
+              "inputLoginValue": "{{system.login}}",
+              "inputUrlValue": "{{system.url}}",
+              "inputNameValue": "{{system.name}}",
+              "inputPasswordValue": "{{system.password}}",
+              "inputDefinitionValue": "{{system.definition}}",
+              "inputTagsValue": "{{system.tags}}",
+              "inputShareIDValue": "{{system.id}}"
+              }'>
+            <p> {{ system.definition }} </p>
+
+            <td style="width:10%" id="value">
+                <div class="form-group">
+                    <input type="text" style="display: flow-root;" class="form-control passtext" placeholder="Показать пароль" onclick="getPass(this,{{ system.id }})">
+                </div>
+            </td>
+
+            <td style="width: 7%;">{{ system.tags }}</td>
+
+            <td style="width: 6.2%; cursor:pointer" class="btn-table  openmodelshare" data-params='{
+              "title": "Дать доступ",
+              "inputIDValue": "{{system.id}}"
+              }'>
+            <p style="text-align:center;cursor:pointer" > Поделиться </p>
+            </td>
+
+            <td style="width:5.6%;"> <a href="deletepass_{{system.id}}" class="btn btn-danger"> Удалить </a> </td>
+        </tr>
+
+        {% endfor %}
+     </tbody>
+    </table>
+</div>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
+});
+</script>
+<!--Модалка для "Подробнее"-->
+<div class="modal_normal ">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <form   method="POST" action="/index">
+                    <input value="random" placeholder="Login" class="modal-input form-control" id="modal-input-login" name="modal-input-login"/><br>
+                    <input value="random" placeholder="Адрес" class="modal-input form-control" id="modal-input-url" name="modal-input-url"/><br>
+                    <input value="random" placeholder="Имя системы" class="modal-input form-control" id="modal-input-name" name="modal-input-name"/><br>
+                    <input value="random" placeholder="Пароль" class="modal-input form-control edit-pass" id="modal-input-password" name="modal-input-password"/><br>
+                    PassGen:
+                        <label style="cursor:pointer;"><input id="arr_num" type="checkbox"> 0-9</label>
+                        <label style="cursor:pointer;"><input id="arr_en" type="checkbox" checked > A-Z</label>
+                        <label style="cursor:pointer;"><input id="arr_symb" type="checkbox" checked> @*#</label>
+                        <input id="pass_lenght" type="number" step="1" min="8" max="20" value="10" />
+                        <p>
+                            <button class="btn btn-outline-secondary button-pass-start" type="button" id="pass_start" name="modal-input-password" >Passgen</button>
+                        </p>
+                    <input value="random" placeholder="Описание" class="modal-input form-control" id="modal-input-definition" name="modal-input-definition"/><br>
+
+                    Тэги:
+                    <select class="js-example-basic-multiple modal-input form-control" id="modal-input-tags" name="modal-input-tags" id="tagSelector" multiple="multiple"
+                    style="width:300px">
+                        {% for tag in tags %}
+                            <option value="{{tag.tag}} ">{{tag.tag}}</option>
+                        {% endfor %}
+                    </select>
+                    <p>
+
+                    </p>
+                    <button type="submit" class="modal-input btn btn-outline-primary" style="width:100px; height:40px" value="Обновить" id="modal-input-id" name="modal-input-id">Обновить</button>
+                </form>
+            </div>
+
+            <div class="col-4">
+                <form   method="POST" action="/share">
+                    <select class="form-select" name="usersShare" id="usersShareDesc" multiple style="height: 322px;max-width: 300px">
+                        {% for user in users %}
+                            {% if user.is_active %}
+                                <option value="{{user.id}} ">{{user.name}} | {{user.first_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <h6>ID системы, которую вы пошарите сейчас:</h6>
+                    <input type="text" value="random" class="modal-input-share form-control" name="modal-input-shareID" id="modal-input-shareIDDesc"/><br>
+                    <input  class="btn btn-outline-primary" type="submit" value="Submit" id="inputSysNumDesc">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Модалка для "Поделиться"-->
+<div class="modal_normal_share" style="max-width: 500px;">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+
+    <form   method="POST" action="/share">
+        <input class="form-control" type="text" id="searchFilter" name="searchFilter" placeholder="Search" onkeyup="filterItems(this);">
+        <p class="modal-title-share">Заголовок модалки</p>
+
+        <select class="form-select sysShare" name="usersShare" id="usersShare" multiple style="height: 450px;max-width: 100%;">
+            {% for user in users%}
+                {% if user.is_active %}
+                    <option class="elastic" value="{{user.id}} ">
+                        {{user.name}}    | {{user.first_name}} {{user.last_name}}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <br>
+        <h6>ID системы, которую вы пошарите сейчас:</h6>
+        <input type="text" value="random" class="modal-input-share form-control" name="modal-input-shareID" id="modal-input-shareID"/><br>
+        <input class="btn btn-outline-primary" type="submit" value="Поделиться" id="inputSysNum" >
+    </form>
+</div>
+<script>
+    var optionsCache = [];
+
+function filterItems(el) {
+  var value = el.value.toLowerCase();
+  var form = el.form;
+  var opt, sel = form.usersShare;
+  restoreOptions();
+  for (var i=sel.options.length-1; i>=0; i--) {
+    opt = sel.options[i];
+    if (opt.text.toLowerCase().indexOf(value) == -1){
+      opt.classList.add('hide');
+    }
+  }
+}
+
+function restoreOptions(){
+  var sel = document.getElementById('usersShare');
+  for (var i=0, iLen=sel.length; i<iLen; i++) {
+    opt = sel.options[i];
+    opt.classList.remove('hide');
+  }
+}
+
+window.onload = function() {
+  var sel = document.getElementById('usersShare');
+  for (var i=0, iLen=sel.options.length; i<iLen; i++) {
+    optionsCache.push(sel.options[i]);
+  }
+}
+</script>
+
+<script src="/static/js/modal_for_details.js"></script>
+{% if systems.has_prev %} <a href="{{ url_for('main.index', page = systems.prev_num) }}" class="a_header"><< Предыдущая</a>{% else %}<< Предыдущая{% endif %} |
+{% if systems.has_next %} <a href="{{ url_for('main.index', page = systems.next_num) }}" class="a_header">Следующая >></a>{% else %}Следующая >>{% endif %}
+<h6 style="padding-left:25px"> Всего: {{systems.items|length}}  </h6>
+
+{% endblock %}
+
+{% endif %}

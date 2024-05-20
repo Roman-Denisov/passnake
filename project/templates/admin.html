@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Панель управления</title>
+{% endblock %}
+
+
+{% block body %}
+{% if current_user.is_authenticated %}
+  {% if current_user.is_admin %}
+
+<link href="/static/css/bootstrap-toggle.min.css" rel="stylesheet">
+
+<script src="/static/js/bootstrap-toggle.min.js"></script>
+<script src="/static/js/openModalWindows.js"></script>
+<script src="/static/js/is_admin.js"></script>
+
+<div class="container-fluid" style="">
+    <table class="table m-0">
+        <thead class="container">
+        <tr>
+            <th scope="col" style="width: 49px;">#</th>
+            <th scope="col" style="width: 78px;text-align: center">Логин</th>
+            <th scope="col" style="width: 108px;">Имя</th>
+            <th scope="col" style="width: 123px;padding-right: 39px;padding-left: 30px;">Фамилия</th>
+            <th scope="col" style="width: 135px;">E-Mail</th>
+            <th scope="col" style="width:60px">Активен</th>
+            <th scope="col" style="width:85px">Админ</th>
+            <th scope="col" style="width:90px;text-align: center">Пароль</th>
+            <th scope="col" style="width:95px; text-align:right;padding-right: 39px;">Удалить</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<div class="container-fluid"   style="height: 840px; overflow: scroll;">
+    <table class="table ">
+        <tbody>
+
+        {% for user in users %}
+        <tr>
+            <td style="width:25px">{{ user.id }}</td>
+            <td style="width:75px; text-align:center;">{{ user.name }}</td>
+            <td style="width:90px">{{ user.first_name }}</td>
+            <td style="width:100px">{{ user.last_name }}</td>
+            <td style="width:130px">{{ user.email }}</td>
+            <td style="width:60px">
+                {% if user.is_active %}
+                <div class="toggle-active">
+                    <input type="checkbox" class="toggle" data-offstyle="danger" data-onstyle="outline-primary" data-toggle="toggle" checked>
+                    <input type="hidden" value="{{ user.id }}" />
+                    <div class='status' style="display:none;">{{ user.is_active}}</div>
+                </div>
+                {% endif %}
+
+                {% if not user.is_active %}
+                <div class="toggle-active">
+                    <input type="checkbox" class="toggle" data-offstyle="outline-secondary" data-onstyle="success" data-toggle="toggle">
+                    <input type="hidden" value="{{ user.id }}" />
+                    <div class='status' style="display:none;">{{ user.is_active}}</div>
+                </div>
+                {% endif %}
+            </td>
+            <td style="width:60px">
+                {% if user.is_admin %}
+                <div class="toggle-admin">
+                    <input type="checkbox" class="toggle" data-offstyle="danger" data-onstyle="outline-success" data-toggle="toggle" checked>
+                    <input type="hidden" value="{{ user.id }}" />
+                    <div class='status' style="display:none;">{{ user.is_admin}}</div>
+                </div>
+                {% endif %}
+
+                {% if not user.is_admin %}
+                <div class="toggle-admin">
+                    <input type="checkbox" class="toggle" data-offstyle="outline-secondary" data-onstyle="success" data-toggle="toggle">
+                    <input type="hidden" value="{{ user.id }}" />
+                    <div class='status' style="display:none;">{{ user.is_admin}}</div>
+                </div>
+                {% endif %}
+            </td>
+            <td style="width:25px; text-align:center; border-bottom-width:0 0px"> <a href="/update_{{user.id}}" class="btn btn-warning"> Изменить</a> </td>
+            <td style="width:25px; text-align:right"> <a href="/deleteuser_{{user.id}}" class="btn btn-danger"> Удалить </a> </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>
+  <!-- Подложка под #МОДАЛЬНОЕ_ОКНО -->
+<div class="overlay js-overlay-modal"></div>
+  {% endif %}
+{% endif %}
+<h6 style="padding-left:25px"> Всего: {{users|length}} пользователей </h6>
+{% endblock %}
+

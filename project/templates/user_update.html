@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Профиль</title>
+{% endblock %}
+
+{% block body %}
+
+
+<link rel="stylesheet" href="/static/css/live_search.css">
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/live_search.js"></script>
+<script>
+
+$( function(){
+    $('input').click( function(){
+        $(this).select();
+    })
+})
+</script>
+
+<div class="container" style="max-width:800px;border-radius:6px; box-shadow:0 2px 3px rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 10%);">
+    <form method="post">
+        <h1 class="card-title pricing-card-title">{{user.email}}</h1>
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3"></ul>
+        <h3>Имя пользователя (логин):</h3>
+        <input type="text" class="form-control" name="name" id="name" value="{{user.name}}" placeholder="Имя(логин)"><br>
+        <h5>Имя и фамилия:</h5>
+        <input type="text" class="form-control" name="first_name" id="first_name" value="{{user.first_name}}" placeholder="Имя"><br>
+        <input type="text" class="form-control" name="last_name" id="last_name" value="{{user.last_name}}" placeholder="Фамилия"><br>
+        <h3>Пароль. Введите сюда новый пароль и нажмите "Изменить"</h3>
+        <input type="password" class="form-control" name="password" id="password" value="{{user.password}}" placeholder="Пароль"><br>
+        {% if current_user.is_admin%}
+            <h3>ID пользователя</h3>
+            <input type="text" class="form-control" name="id" id="definition" value="{{user.id}}" placeholder="ID">
+        {% else %}
+            <h3>ID пользователя</h3>
+            <input type="text" class="form-control" name="id" value="{{user.id}}" placeholder="ID" disabled>
+        {% endif %}
+
+        <br>
+        <button class="btn btn-success" type="submit" >Изменить</button>
+    </form>
+    <br>
+
+{% if user.is_admin %}
+</div>
+<br>
+<div class="container" style="max-width:800px;">
+    <form   method="POST" action="/share">
+        <div class="box" style="max-width: 1000px;">
+            <div class="row align-items-center">
+                <p class="modal-title-share">Поделиться</p>
+                <input class="form-control" type="text" id="searchFilter" name="searchFilter" placeholder="Search" onkeyup="filterItems(this);">
+                <div class="col-3" style="margin-left:0;">
+                    <select class="form-select" name="usersShare" id="usersShare" multiple style="height: 450px;max-width: 300px;">
+                        {% for user in users %}
+                            {% if user.is_active%}
+                                <option value="{{user.id}} ">{{user.name}} | {{user.first_name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col" style="width:50%; margin-left:0;">
+
+                    <select class="form-select sysShare" name="systemsShare"  multiple id="systemsShare" style="height: 450px;max-width: 800px;">
+                        {% for system in systems %}
+                            <option value="{{system.id}} "> [{{system.tags}}] {{system.login}}@{{system.url}} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="text" value="random" class="form-control" name="inputSysNum" id="inputSysNum"/><br>
+            </div>
+            <br>
+            <h6> Используйте этот блок для того, чтобы пошарить сразу много систем </h6>
+            <input type="submit" value="Submit" class="btn btn-success">
+        </div>
+    </form>
+</div>
+
+
+<!--Вставляетзначения в поле при их выборе-->
+<script>
+    const select = document.getElementById('systemsShare');
+    const option = document.getElementById('systemsShare option');
+    const input = document.getElementById('inputSysNum');
+
+    select.addEventListener("change", function () {
+      input.value = [...select.options].filter(option => option.selected).map(option => option.value);
+    });
+</script>
+{% endif %}
+{% endblock %}
+{% block footer %}
+
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3"></ul>
+{% endblock %}

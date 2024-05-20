@@ -1,0 +1,50 @@
+# an example with using harbor as your registry
+variables:
+  SERVER_IP: {{ registry_ip }} 
+  SERVER_USER: {{ server_admin }}
+  SYSTEM_NAME: Somename
+  
+stages:
+  - Build
+  - Push Harbor
+  # - Delivering
+#
+Build:
+  stage: Build
+  only:
+    - master
+  tags:
+    - passnake
+  script:
+    - docker -l "debug" build -f ./Dockerfile -t {{ your_registry }}/py/passnake:$CI_PIPELINE_ID .
+
+Push Harbor:
+  stage: Push Harbor
+  only:
+    - master
+  tags:
+    - passnake
+  before_script:
+    - docker login -u $REGISTRY_LOGIN -p $REGISTRY_PASS $REGISTRY_URL
+  script:
+    - docker push {{ your_registry }}/py/passnake:$CI_PIPELINE_ID
+    - docker tag {{ your_registry }}/py/passnake:$CI_PIPELINE_ID {{ your_registry }}/py/passnake:latest
+    - docker push {{ your_registry }}/py/passnake:latest
+
+
+# Delivering:
+#   stage: Delivering
+#   only:
+#     - master
+#   tags:
+#     - passnake
+#   before_script:
+#     - mkdir -p ~/.ssh
+#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+#     - eval $(ssh-agent -s)
+#     - chmod 700 ~/.ssh/id_rsa
+#     - ssh-add ~/.ssh/id_rsa
+#     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+#     # - docker login -u $REGISTRY_LOGIN -p $REGISTRY_PASS $REGISTRY_URL
+#   script:
+#     - ssh -tt $SERVER_USER@$SERVER_IP "cd ./docker/passnake && docker-compose pull passnake && docker-compose up -d && exit && bash" 

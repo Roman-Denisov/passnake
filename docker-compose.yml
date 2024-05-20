@@ -1,0 +1,39 @@
+version: "3"
+services:
+# it's an example file  
+  passnake:
+    container_name: passnake
+    image:  passnake-docker:latest
+    volumes:
+    # example
+    - [(full)path_to_project_dir]/static/img/:/app/project/static/img
+    restart: always
+    env_file: ./.env
+    networks:
+      - passnake-net
+    ports:
+      - "33080:5000"
+      - "33443:443"  
+    logging:
+      options:
+        max-size: "50m"
+        max-file: "20"
+  # 
+  # gitlab-runner:
+  #   container_name: git-runner-passnake
+  #   image: gitlab/gitlab-runner:alpine3.14-bleeding
+  #   volumes:
+  #     -  /opt/docker-volumes/passnake/runner/config:/etc/gitlab-runner
+  #     -  /var/run/docker.sock:/var/run/docker.sock
+  #   restart: always
+  #   logging:
+  #     options:
+  #        max-size: "50m"
+  #        max-file: "20"
+
+networks:
+  passnake-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.111.0/24

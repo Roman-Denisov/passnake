@@ -1,0 +1,186 @@
+{% if current_user.is_authenticated %}
+
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Все системы</title>
+{% endblock %}
+
+{% block body %}
+
+<script src="/static/js/modal_for_share.js"></script>
+<script src="/static/js/modal_for_details.js"></script>
+<script src="/static/js/encode_decode.js"></script>
+
+<!-- таблица-заголовок Основной таблицы-->
+<div class="container-fluid" style="height: 55px;">
+    <table class="table table-bordered m-0">
+        <thead class="container">
+        <tr>
+            <th scope="col" style="padding-left:15px;width:47px">#</th>
+            <th scope="col" style="width: 248px;">
+                <form method="GET">
+                    <div class="form-group">
+                        <input type="text" placeholder="Логин" style="width:130px" class="form-control" name="q_login" value="">
+                    </div>
+                </form>
+            </th>
+            <th scope="col" style="width:317px">
+                <form method="GET">
+                    <div class="form-group">
+                        <input type="text" placeholder="Адрес" style="width:300px" class="form-control" name="q_url" value="">
+                    </div>
+                </form>
+            </th>
+            <th scope="col" style="width: 600px;">
+                <form method="GET">
+                    <div class="form-group">
+                        <input type="text" placeholder="Описание" style="width:580px" class="form-control" name="q_definition" value="">
+                    </div>
+                </form>
+            </th>
+            <th scope="col" style="width:200px">Пароль</th>
+            <th scope="col" style="padding-right: 79px;">Тэг</th>
+            <th scope="col" style="width:75px;text-align:right;padding-right: 34px;">Поделиться</th>
+            <th scope="col" style="width:50px;padding-right: 44px; text-align:right">Удалить</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- Основная таблица, где хранятся пароли-->
+<div class="container-fluid"   style="height: 810px; overflow: scroll;">
+    <table class="table table-bordered">
+        <tbody>
+        {% for system in systems %}
+        <tr>
+            <td  class="fulltext" style="width:3%">{{ system.id }}</td>
+            <td style="width:150px">{{ system.login }}</td>
+            <td style="width:300px " class="btn-table  openmodel" data-params='{
+                  "title": "{{system.name}}",
+                  "inputIdValue": "{{system.id}}",
+                  "inputLoginValue": "{{system.login}}",
+                  "inputUrlValue": "{{system.url}}",
+                  "inputNameValue": "{{system.name}}",
+                  "inputPasswordValue": "{{system.password}}",
+                  "inputDefinitionValue": "{{system.definition}}"
+                  }'>
+                <p class="fulltext"> {{ system.url }} </p>
+            </td>
+
+            <td style="width:600px" class="btn-table  openmodel" data-params='{
+                  "title": "{{system.name}}",
+                  "inputIdValue": "{{system.id}}",
+                  "inputLoginValue": "{{system.login}}",
+                  "inputUrlValue": "{{system.url}}",
+                  "inputNameValue": "{{system.name}}",
+                  "inputPasswordValue": "{{system.password}}",
+                  "inputDefinitionValue": "{{system.definition}}"
+                  }'>
+                <p> {{ system.definition }} </p>
+            </td>
+            <td style="width:200px" id="value">
+                <div class="form-group">
+                    <input type="text" style="width:180px; display: flow-root;" class="form-control passtext"  placeholder="Показать пароль" onclick="getPass(this,{{ system.id }})">
+                </div>
+            </td>
+            <td>{{ system.tags }}</td>
+            <td  class="btn-table  openmodelshare" data-params='{
+                  "title": "Дать доступ",
+                  "inputIDValue": "{{system.id}}"
+                  }'>
+                <p class="fulltext "style="width:125px"> Поделиться </p>
+            </td>
+            <td style="width:25px">
+                <a href="/delfromdb_{{system.id}}" class="btn btn-danger"> Удалить </a>
+            </td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+<!--Модальное окно "Детали"-->
+<div class="modal_normal ">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <form   method="POST" action="/index">
+                    <input value="random" placeholder="Login" class="modal-input form-control" id="modal-input-login" name="modal-input-login"/><br>
+                    <input value="random" placeholder="Адрес" class="modal-input form-control" id="modal-input-url" name="modal-input-url"/><br>
+                    <input value="random" placeholder="Имя системы" class="modal-input form-control" id="modal-input-name" name="modal-input-name"/><br>
+                    <input value="random" placeholder="Пароль" class="modal-input form-control edit-pass" id="modal-input-password" name="modal-input-password"/><br>
+                    PassGen:
+                        <label style="cursor:pointer;"><input id="arr_num" type="checkbox"> 0-9</label>
+                        <label style="cursor:pointer;"><input id="arr_en" type="checkbox" checked > A-Z</label>
+                        <label style="cursor:pointer;"><input id="arr_symb" type="checkbox" checked> @*#</label>
+                        <input id="pass_lenght" type="number" step="1" min="8" max="20" value="10" />
+                        <p>
+                            <button class="btn btn-outline-secondary button-pass-start" type="button" id="pass_start" name="modal-input-password" >Passgen</button>
+                        </p>
+                    <input value="random" placeholder="Описание" class="modal-input form-control" id="modal-input-definition" name="modal-input-definition"/><br>
+
+<!--                    Тэги:-->
+
+<!--                    <input type="hidden" id="modal-input-tags" name="modal-input-tags" value="1">-->
+<!--                    <select id="selector" class="js-example-basic-multiple modal-input form-control"  multiple="multiple" style="width:300px">-->
+<!--                        {% for tag in tags %}-->
+<!--                            <option value="{{tag.tag}} ">{{tag.tag}}</option>-->
+<!--                        {% endfor %}-->
+<!--                    </select>-->
+                    <button type="submit" class="modal-input btn btn-outline-primary" style="width:100px; height:40px" value="Обновить" id="modal-input-id" name="modal-input-id">Обновить</button>
+                </form>
+            </div>
+
+<!--            <div class="col-4">-->
+<!--                <form   method="POST" action="/share">-->
+<!--                    <select class="form-select" name="usersShare" id="usersShareDesc" multiple style="height: 322px;max-width: 300px">-->
+<!--                        {% for user in users %}-->
+<!--                            {% if user.is_active %}-->
+<!--                                <option value="{{user.id}} ">{{user.name}} | {{user.first_name}}</option>-->
+<!--                            {% endif %}-->
+<!--                        {% endfor %}-->
+<!--                    </select>-->
+<!--                    <br>-->
+<!--                    <h6>ID системы, которую вы пошарите сейчас:</h6>-->
+<!--                    <input type="text" value="random" class="modal-input-share form-control" name="modal-input-shareID" id="modal-input-shareIDDesc"/><br>-->
+<!--                    <input  class="btn btn-outline-primary" type="submit" value="Submit" id="inputSysNumDesc">-->
+<!--                </form>-->
+<!--            </div>-->
+        </div>
+    </div>
+</div>
+
+<!--Модальное окно для "Поделиться"-->
+<div class="modal_normal_share" style="max-width: 500px;">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+
+    <form   method="POST" action="/share">
+        <input class="form-control" type="text" id="searchFilter" name="searchFilter" placeholder="Search" onkeyup="filterItems(this);">
+        <p class="modal-title-share">Заголовок модалки</p>
+
+        <select class="form-select sysShare" name="usersShare" id="usersShare" multiple style="height: 450px;max-width: 100%;">
+            {% for user in users%}
+                {% if user.is_active %}
+                    <option class="elastic" value="{{user.id}} ">
+                        {{user.name}}    | {{user.first_name}} {{user.last_name}}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <br>
+        <h6>ID системы, которую вы пошарите сейчас:</h6>
+        <input type="text" value="random" class="modal-input-share form-control" name="modal-input-shareID" id="modal-input-shareID"/><br>
+        <input class="btn btn-outline-primary" type="submit" value="Поделиться" id="inputSysNum" >
+    </form>
+</div>
+
+<h6 style="padding-left:25px"> Всего: {{systems|length}} паролей в БД </h6>
+
+
+{% endblock %}
+
+{% endif %}

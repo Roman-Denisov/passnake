@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link type="image/x-icon" href="/static/img/favicon2.svg" rel="shortcut icon">
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/lib/noty.css">
+    <link rel="stylesheet" href="/static/css/table.css">
+    <link rel="stylesheet" href="/static/css/test.css">
+    <link rel="stylesheet" href="/static/css/lib/themes/metroui.css">
+    <link rel="stylesheet" href="/static/css/good_modal.css">
+
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/noty.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/passgen.js"></script>
+    <script src="/static/js/openModalWindows.js"></script>
+
+    {% if current_user.name != "admin"
+        and current_user.name != "rvd"%}
+        <script src="/static/js/autologout.js"></script>
+    {% endif %}
+    {% block title %} {% endblock %}
+
+</head>
+
+
+<!--  #ШАПКА НАЧАЛО -->
+<body>
+<div class="container" style="max-width:90%">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between">
+        <div class="d-flex flex-wrap align-items-center">
+        <a href="/" class="d-flex align-items-center  me-2  mb-md-0 text-dark text-decoration-none img_header">
+            <img src="/static/img/favicon.svg" style="height:50px;" alt="Главная">
+        </a>
+            {% if current_user.is_admin %}
+                <a class="nav-link active me-1 a_header" href="/admin">Юзеры</a>
+                <a class="nav-link active me-2 a_header" href="/admin/systems">Все пароли</a>
+                <a href="#" class="nav-link active me-2 js-open-modal a_header" data-modal="1">+ Новый юзер</a>
+            {% endif %}
+            <a href="#" class="nav-link active me-2 js-open-modal a_header" data-modal="2">+ Добавить пароль</a>
+        </div>
+        <nav class="navbar navbar-expand-lg navbar-white">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarColor02">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item active">
+                            <span class="visually-hidden">(current)</span>
+                        </li>
+
+                        <li class="nav-item dropdown">
+<!--                          Вставляем дропдаун с именем пользователя и сгенерированной аватаркой (граватар) -->
+                            <a class="nav-link dropdown-toggle"  style="color:black;" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><img src="{{ current_user.avatar(128) }} " width="35" height="35" class="rounded-circle me-2" alt="Меню" >{{ current_user.name }} </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href=""><i class="bi bi-bookmark"></i> U can change this menu in base.html file.</a>
+                                <a class="dropdown-item" href="/update_{{current_user.id}}"><i class="bi bi-person-circle"></i> Profile </a>
+                                <a class="dropdown-item" href="/recycle"><i class="bi bi-trash"></i>  Recycle</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="https://github.com/Roman-Denisov" target="_blank"><img src="/static/img/github.svg" style="height:20px;"> GitHub </a>
+                                <a class="dropdown-item" href="https://about.gitlab.com/" target="_blank"><img src="/static/img/gitlab_new.png" style="height:20px;"> GitLab </a>
+                                <a class="dropdown-item" href="https://www.microsoft.com/ru-ru/microsoft-365/outlook/email-and-calendar-software-microsoft-outlook" target="_blank"><img src="/static/img/outlook.png" style="height:20px;">  E-mail </a>
+                                <a class="dropdown-item" href="https://www.atlassian.com/software/confluence" target="_blank"><img src="/static/img/confluence.png" style="height:20px;">  Confluence </a>
+                                <a class="dropdown-item" href="https://calendar.google.com/" target="_blank"><img src="/static/img/googlecal.png" style="height:20px;">  Google Cal </a>
+                                <a class="dropdown-item" href="https://www.zabbix.com/ru" target="_blank"><img src="/static/img/zabbix.svg" style="height:20px;">  Zabbix </a>
+                                <a class="dropdown-item" href="https://aws.amazon.com" target="_blank"><img src="/static/img/croccloud.ico" style="height:20px;">  Cloud console</a>
+                                <a class="dropdown-item" href="https://nextcloud.com" target="_blank"><img src="/static/img/nextcloud.svg" style="height:20px;">  Nextcloud </a>
+
+                          {% if current_user.is_admin %}
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/admin/systems"><i class="bi bi-globe"></i> Системы </a>
+                                <a class="dropdown-item" href="/admin"><i class="bi bi-toggles"></i> Юзеры </a>
+                                <a class="dropdown-item" href="/history"><i class="bi bi-clock-history"></i> История </a>
+                          {% endif %}
+
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="bi bi-windows"></i>  Выйти</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+</div>
+{% block body %} {% endblock %}
+
+          <!--   #МОДАЛЬНОЕ_ОКНО для нового пароля  -->
+<div class="modal" data-modal="2">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+    <div class="container" >
+        <form  method="POST" action="/addpass">
+            <div class="row">
+                <div class="col-8">
+
+                    <input type="text" class="form-control" name="login" id="login" placeholder="Login"><br>
+                    <input type="text" class="form-control" name="url" id="url" placeholder="Адрес"><br>
+                    <input type="text" class="form-control" name="name" id="name" placeholder="Имя системы"><br>
+                    <input type="text" class="form-control" name="password" id="password" placeholder="Пароль"><br>
+                        PassGen:
+                           <label style="cursor:pointer;"><input id="arr_num_add" type="checkbox" >0-9</label>
+                            <label style="cursor:pointer;"><input id="arr_en_add" type="checkbox" checked > A-Z</label>
+                            <label style="cursor:pointer;"><input id="arr_symb_add" type="checkbox" checked> @*#</label>
+                            <input id="pass_lenght_add" type="number" step="1" min="8" max="20" value="10" />
+                            <p><br>
+                                <button class="btn btn-outline-secondary button-pass-start" type="button" id="pass_start_add" name="password" >Сгенерировать</button>
+                            </p>
+                        <input type="text" class="form-control" name="definition" id="definition" placeholder="Описание"><br>
+                        <input type="text" class="form-control" name="tags" id="tags" placeholder="Тэги">
+                        <br>
+                </div>
+                <div class="col-4">
+                        <select class="form-select" name="usersShareBase" id="usersShareBase" multiple style="height: 454px;max-width: 300px; margin-top:-1px">
+                            {% for user in users %}
+                                {% if user.is_active %}
+                                    <option value="{{user.id}} ">{{user.name}} | {{user.first_name}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                </div>
+            </div>
+            <button class="btn btn-outline-success" type="submit">Добавить</button>
+        </form>
+    </div>
+</div>
+
+          <!-- Подложка под модальным окном -->
+
+<div class="overlay js-overlay-modal"></div>
+
+
+{% if current_user.is_admin %}
+
+      <!--   #МОДАЛЬНОЕ_ОКНО для нового пользователя  -->
+<div class="modal" data-modal="1">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg"               viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+    <h3>Добавить пользователя</h3>
+    <div class="column is-4 is-offset-4" style="width:100%; margin-left:0;">
+        <div class="box">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="notification is-danger">
+                    {{ messages[0] }}. Go to <a href="{{ url_for('auth.login') }}">login page</a>.
+                </div>
+                {% endif %}
+            {% endwith %}
+            <form method="POST" action="/signup">
+                <div class="field">
+                    <div class="control">
+                        <input class="form-control form-control-lg mt-3" type="email" name="email" placeholder="Адрес электронной почты" autofocus="">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <input class="form-control form-control-lg mt-3" type="text" name="name" placeholder="Login" autofocus="">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <input class="form-control form-control-lg mt-3" type="password" name="password" placeholder="Пароль">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <input class="form-control form-control-lg mt-3" type="text" name="first_name" placeholder="Имя">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <input class="form-control form-control-lg my-3" type="text" name="last_name" placeholder="Фамилия">
+                    </div>
+                </div>
+
+                <button class="btn btn-outline-success">Зарегистрировать</button>
+            </form>
+        </div>
+    </div>
+</div>
+    {% block footer %}
+
+    {% endblock %}
+
+{% endif %}
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+{% if not current_user.is_admin %}
+
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3"></ul>
+
+{% endif %}
+</body>
+
+</html>

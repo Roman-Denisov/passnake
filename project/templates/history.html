@@ -1,0 +1,174 @@
+{% if current_user.is_authenticated %}
+
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>История изменений</title>
+{% endblock %}
+{% block body %}
+
+<script src="/static/js/modal_for_share.js"></script>
+<script src="/static/js/modal_for_details.js"></script>
+<script src="/static/js/encode_decode.js"></script>
+
+
+<div class="container-fluid" style="height: 55px;">
+  <table class="table table-bordered m-0">
+    <thead class="container">
+      <tr>
+        <th scope="col" style="width:55px; padding-left:15px;">#</th>
+        <th scope="col" style="width:200px">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Логин" class="form-control" name="q_login"  value="{{ request.args.get('q_login', '') }}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:250px">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Адрес" class="form-control" name="q_url"  value="{{request.args.get('q_url', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="min-width:500px">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Описание" class="form-control" name="q_definition"  value="{{request.args.get('q_definition', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:200px">Пароль</th>
+        <th scope="col" style="width:200px">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Тэг" class="form-control" name="q_tag"  value="{{request.args.get('q_tag', '')}}">
+                </div>
+            </form>
+        </th>
+        <th scope="col" style="width:111px; text-align:center;">Дата Время</th>
+        <th scope="col" style="width:170px; text-align:center;">
+            <form method="GET">
+                <div class="form-group">
+                    <input type="text" placeholder="Пользователь" class="form-control" name="q_user"  value="{{request.args.get('q_user', '')}}">
+                </div>
+            </form>
+        </th>
+      </tr>
+    </thead>
+  </table>
+</div>
+
+<div class="container-fluid" style="height: 800px; overflow-y: scroll; margin-top:10px">
+    <table class="table table-bordered">
+      <tbody>
+        {% for system in systems.items %}
+        <tr>
+          <td style="width:55px">{{ system.id }}</td>
+
+          <td style="width:200px; cursor:pointer"  class="btn-table openmodel" data-params='{
+              "title": "{{system.name}}",
+              "inputShareIdValue": "{{system.id}}",
+              "inputIdValue": "{{system.id}}",
+              "inputLoginValue": "{{system.login}}",
+              "inputUrlValue": "{{system.url}}",
+              "inputNameValue": "{{system.name}}",
+              "inputPasswordValue": "{{system.passwordrsa}}",
+              "inputDefinitionValue": "{{system.definition}}",
+              "inputTagsValue": "{{system.tags}}",
+              "inputShareIDValue": "{{system.id}}"
+              }'>
+            <p style="text-align:center;"> {{ system.login }} </p>
+          </td>
+
+          <td style="width:250px;">
+              <input type="text" style="text-align:center; display: flow-root;" class="passtextcopy form-control"  value="{{ system.url }}">
+          </td>
+
+          <td style="min-width:500px; cursor:pointer" class="btn-table openmodel" data-params='{
+              "title": "{{system.name}}",
+              "inputIdValue": "{{system.id}}",
+              "inputLoginValue": "{{system.login}}",
+              "inputUrlValue": "{{system.url}}",
+              "inputNameValue": "{{system.name}}",
+              "inputPasswordValue": "{{system.passwordrsa}}",
+              "inputDefinitionValue": "{{system.definition}}",
+              "inputTagsValue": "{{system.tags}}",
+              "inputShareIDValue": "{{system.id}}"
+              }'>
+            <p> {{ system.definition }} </p>
+
+            <td style="width:200px" id="value" >
+                <div class="form-group">
+                    <input type="text" style="display: flow-root;" class="form-control passtext" placeholder="Показать пароль" onclick="getPass(this,{{ system.history_id }}, true)">
+                </div>
+            </td>
+
+            <td style="width: 200px;">{{ system.tags }}</td>
+            <td style="width: 111px;"> {{system.date}} </td>
+            <td style="width:155px;"> {{system.user_name}}</td>
+        </tr>
+
+        {% endfor %}
+     </tbody>
+    </table>
+</div>
+<!--Модалка для "Подробнее"-->
+
+<div class="modal_normal ">
+    <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form   method="POST" action="/update_system">
+                    <p class="modal-title"><h3>Актуальные сведения</h3>
+                    Логин:
+                    <input value="random" class="modal-input form-control" id="modal-input-login" name="modal-input-login"/><br>
+                    URL:
+                    <input value="random" class="modal-input form-control" id="modal-input-url" name="modal-input-url"/><br>
+                    Имя системы:
+                    <input value="random" class="modal-input form-control" id="modal-input-name" name="modal-input-name"/><br>
+                    <h5>Актуальный пароль:</h5>
+                    <input value="random" class="modal-input form-control passtext" id="modal-input-password" name="modal-input-password"/><br>
+                    <input value="random" class="modal-input form-control" id="modal-input-definition" name="modal-input-definition"/><br>
+                    Теги:
+                    <input value="random" class="modal-input form-control" id="modal-input-tags" name="modal-input-tags"/><br>
+                    <button type="submit" class="modal-input btn btn-outline-primary disabled" style="width:100px; height:40px" value="Обновить" id="modal-input-id" name="modal-input-id">Обновить</button>
+                </form>
+            </div>
+
+      </div>
+      </div>
+</div>
+<!--Модалка для "Поделиться"-->
+        <div class="modal_normal_share" style="max-width: 1000px;">
+            <svg class="modal__cross js-modal-close" xmlns="http://www.w3.org/2000/svg"               viewBox="0 0 24 24"><path d="M23.954 21.03l-9.184-9.095 9.092-9.174-2.832-2.807-9.09 9.179-9.176-9.088-2.81 2.81 9.186 9.105-9.095 9.184 2.81 2.81 9.112-9.192 9.18 9.1z"/></svg>
+            <form   method="POST" action="/share">
+                <div class="box" style="max-width: 1000px;">
+                    <div class="row align-items-center">
+                        <p class="modal-title-share">Заголовок модалки</p>
+                        <div class="col-3" style="margin-left:0;">
+
+                            <select class="form-select" name="usersShare" id="usersShare" multiple style="height: 450px;max-width: 300px;">
+                            {% for user in users%}
+                                <option value="{{user.id}} ">{{user.name}}</option>
+                            {% endfor %}
+                            </select>
+
+                        </div>
+                    </div>
+                    <br>
+                    <h6>ID системы, которую вы пошарите сейчас:</h6>
+                    <input type="text" value="random" class="modal-input-share form-control" name="modal-input-shareID" id="modal-input-shareID"/><br>
+                    <input class="btn btn-outline-primary" type="submit" value="Submit" id="inputSysNum" >
+                </div>
+            </form>
+        </div>
+
+
+{% if systems.has_prev %} <a href="{{ url_for('admin.history', page = systems.prev_num) }}"><< Предыдущая</a>{% else %}<< Предыдущая{% endif %} |
+{% if systems.has_next %} <a href="{{ url_for('admin.history', page = systems.next_num) }}">Следующая >></a>{% else %}Следующая >>{% endif %}
+
+{% endblock %}
+
+{% endif %}
