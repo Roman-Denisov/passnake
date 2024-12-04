@@ -5,14 +5,15 @@ import os
 
 # В этом файле создается само приложение и все его необходимые переменные и конфиги
 db = SQLAlchemy()
-
+mysql_user = os.environ.get('mysql_user')
+mysql_db_name = os.environ.get('mysql_db_name')
 mysql_password = os.environ.get('mysql_password')
 mysql_ip = os.environ.get('mysql_ip')
-
+print(mysql_ip, mysql_user, mysql_db_name, mysql_password)
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{mysql_password}@{mysql_ip}:3306/passnake'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_ip}:3306/{mysql_db_name}'
 db.init_app(app)
 
 login_manager = LoginManager()
@@ -37,6 +38,8 @@ app.register_blueprint(main_blueprint)
 # blueprint for non-auth parts of app
 from .admin import admin as main_blueprint
 app.register_blueprint(main_blueprint)
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     # Will make the server available externally as well

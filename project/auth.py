@@ -44,6 +44,27 @@ def login():
 
 @auth.route('/login', methods=['POST'])
 def login_post():
+    users = Users.query.order_by(Users.is_active.desc()).all()
+
+    if not users:
+        email = "admin"
+        name = "admin"
+        password = "admin"
+        first_name = "admin"
+        last_name = "admin"
+        is_admin = 1
+        # if this returns a user, then the email already exists in database
+        user = Users.query.filter_by(email=email).first()
+
+        if user:  # if a user is found, we want to redirect back to signup page so user can try again
+            flash('Email address already exists')
+            return redirect(url_for('auth.signup'))
+
+        new_user = Users(email=email, name=name, is_admin=is_admin, first_name=first_name, last_name=last_name,
+                         password=generate_password_hash(password, method='sha256'))
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('main.index'))
 
     name = request.form.get('name')
     password = request.form.get('password')
